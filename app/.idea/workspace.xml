@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a2dfc559-c325-45e3-acba-f6d97ea0c9f0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/assets/yolov4-416.tflite" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/assets/coco.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/assets/coco.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/assets/labelmap.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/assets/labelmap.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/tensorflow/lite/examples/detection/DetectorActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/tensorflow/lite/examples/detection/DetectorActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/tensorflow/lite/examples/detection/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/tensorflow/lite/examples/detection/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/tensorflow/lite/examples/detection/tflite/YoloV4Classifier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/tensorflow/lite/examples/detection/tflite/YoloV4Classifier.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../result.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../result.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../save_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../save_model.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="1kBMV6nyBwYWPXTO0KpEi1j9sER" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a2dfc559-c325-45e3-acba-f6d97ea0c9f0" name="Default Changelist" comment="" />
+      <created>1605169551403</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1605169551403</updated>
+    </task>
+    <servers />
+  </component>
+</project>
