@@ -72,21 +72,21 @@ public class MultiBoxTracker {
   private static final float TEXT_SIZE_DIP = 18;
   private static final float MIN_SIZE = 16.0f;
   private static final int[] COLORS = {
-    Color.BLUE,
-    Color.RED,
-    Color.GREEN,
-    Color.YELLOW,
-    Color.CYAN,
-    Color.MAGENTA,
-    Color.WHITE,
-    Color.parseColor("#55FF55"),
-    Color.parseColor("#FFA500"),
-    Color.parseColor("#FF8888"),
-    Color.parseColor("#AAAAFF"),
-    Color.parseColor("#FFFFAA"),
-    Color.parseColor("#55AAAA"),
-    Color.parseColor("#AA33AA"),
-    Color.parseColor("#0D0068")
+          Color.BLUE,
+          Color.RED,
+          Color.GREEN,
+          Color.YELLOW,
+          Color.CYAN,
+          Color.MAGENTA,
+          Color.WHITE,
+          Color.parseColor("#55FF55"),
+          Color.parseColor("#FFA500"),
+          Color.parseColor("#FF8888"),
+          Color.parseColor("#AAAAFF"),
+          Color.parseColor("#FFFFAA"),
+          Color.parseColor("#55AAAA"),
+          Color.parseColor("#AA33AA"),
+          Color.parseColor("#0D0068")
   };
   final List<Pair<Float, RectF>> screenRects = new LinkedList<Pair<Float, RectF>>();
   private final Logger logger = new Logger();
@@ -119,13 +119,13 @@ public class MultiBoxTracker {
     boxPaint.setStrokeMiter(100);
 
     textSizePx =
-        TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, context.getResources().getDisplayMetrics());
+            TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, context.getResources().getDisplayMetrics());
     borderedText = new BorderedText(textSizePx);
   }
 
   public synchronized void setFrameConfiguration(
-      final int width, final int height, final int sensorOrientation) {
+          final int width, final int height, final int sensorOrientation) {
     frameWidth = width;
     frameHeight = height;
     this.sensorOrientation = sensorOrientation;
@@ -172,7 +172,7 @@ public class MultiBoxTracker {
   @RequiresApi(api = Build.VERSION_CODES.N)
   private void processDetectedObject(List<Recognition> results) {
     if(results.size() == 0) return;
-    HashMap<String, ArrayList<String>> objectCounter = new HashMap<>();
+    HashMap<String, ArrayList<Pair<String, Float>>> objectCounter = new HashMap<>();
 
     String maxTitle = "";
     int maxCount = 0;
@@ -183,14 +183,16 @@ public class MultiBoxTracker {
       float confidence = recog.getConfidence();
       RectF location = recog.getLocation();
 
-      float centerPosX = (location.right + location.left) / 2;
-      float centerPosY = (location.top + location.bottom) / 2;
+      int xIndex = (int)Math.floor(location.centerX() / (frameWidth / BLOCK_SIZE));
+      int yIndex = (int)Math.floor(location.centerY() / (frameHeight / BLOCK_SIZE));
 
-      int xIndex = (int)Math.floor(centerPosX / (frameWidth / BLOCK_SIZE));
-      int yIndex = (int)Math.floor(centerPosY / (frameHeight / BLOCK_SIZE));
+      float areaSize = location.width() * location.height();
+      String position = BLOCK_NAMES[xIndex][BLOCK_SIZE - yIndex - 1];
 
-      ArrayList<String> postionList = objectCounter.getOrDefault(title, new ArrayList<>());
-      postionList.add(BLOCK_NAMES[xIndex][BLOCK_SIZE - yIndex - 1]);
+      ArrayList<Pair<String, Float>> postionList = objectCounter.getOrDefault(title, new ArrayList<>());
+      Pair<String, Float> dataPair = new Pair<>(position, areaSize);
+
+      postionList.add(dataPair);
       if(postionList.size() > maxCount) {
         maxCount = postionList.size();
         maxTitle = title;
@@ -201,8 +203,107 @@ public class MultiBoxTracker {
       logger.i("push " + title + " " + confidence + " " + location);
       logger.i("max" + maxTitle + maxCount);
     }
-    // 2명 이하는 송출x
-    if(isSpeeching || maxCount < 2) return;
+    // 이미 음성을 송출 중이면, 스킵
+    if(isSpeeching) return;
+
+    // {person=[Pair{LM 8816.249}, Pair{LM 12037.989}]}
+    logger.i(objectCounter.toString(), objectCounter.size());
+
+
+    // 객체의 종류가 1개일 때
+    if(objectCounter.size() == 1) {
+      ArrayList<Pair<String, Float>> detectedList = objectCounter.get(maxTitle);
+
+      if(DETECT_OBJECT_LIST.get(0) == maxTitle) {
+        // """
+        // person
+        // """
+
+        if(detectedList.size() > 4) {
+          // 사람이 많을 때
+
+          // 전방에 사람이 많으니 주의하세요.
+        } else {
+          boolean isMiddle = false;
+          for(int i = 0; i < detectedList.size(); i++) {
+            String position = detectedList.get(i).first;
+            float areaSize = detectedList.get(i).second;
+
+            // 화면의 중앙에 있고, 사이즈가 3만 이상. (총 프레임사이즈는 약 30만)
+            if ((position == "MM" || position == "MB") && areaSize > 30000) {
+              isMiddle = true;
+            }
+          }
+
+          if(isMiddle) {
+            // 전방의 사람에 주의하세요.
+          }
+        }
+
+      } else if(DETECT_OBJECT_LIST.get(1) == maxTitle
+              || DETECT_OBJECT_LIST.get(2) == maxTitle
+              || DETECT_OBJECT_LIST.get(3) == maxTitle
+              || DETECT_OBJECT_LIST.get(4) == maxTitle) {
+        // """
+        // motorcycle, bus, car, truck,
+        // """
+
+        boolean isMiddle = false;
+        for(int i = 0; i < detectedList.size(); i++) {
+          String position = detectedList.get(i).first;
+          float areaSize = detectedList.get(i).second;
+
+          // 화면의 중앙에 있고, 사이즈가 10만 이상. (총 프레임사이즈는 약 30만)
+          if ((position == "MM" || position == "MB") && areaSize > 100000) {
+            isMiddle = true;
+          }
+        }
+
+        if(isMiddle) {
+          // 전방에 차가 있습니다. 주의하세요.
+        }
+      } else if(DETECT_OBJECT_LIST.get(5) == maxTitle) {
+        // """
+        // bikerider
+        // """
+
+        boolean isMiddle = false;
+        for(int i = 0; i < detectedList.size(); i++) {
+          String position = detectedList.get(i).first;
+          float areaSize = detectedList.get(i).second;
+
+          // 화면의 중앙에 있고, 사이즈가 5만 이상. (총 프레임사이즈는 약 30만)
+          if ((position == "MM" || position == "MB") && areaSize > 50000) {
+            isMiddle = true;
+          }
+        }
+
+        if(isMiddle) {
+          // 자전거를 탄 사람이 있습니다. 주의하세요.
+        }
+      } else if(DETECT_OBJECT_LIST.get(6) == maxTitle) {
+        // """
+        // bollard
+        // """
+
+        boolean isBottom = false;
+        for(int i = 0; i < detectedList.size(); i++) {
+          String position = detectedList.get(i).first;
+
+          // 화면의 아래에 있을 때
+          if (position == "LB" || position == "MB" || position == "RB") {
+            isBottom = true;
+          }
+        }
+
+        if(isBottom) {
+          // 전방에 볼라드가 있습니다.
+        }
+      }
+
+    } else {
+      // 장애물이 많을 때
+    }
 
     this.isSpeeching = true;
 
@@ -222,17 +323,17 @@ public class MultiBoxTracker {
   public synchronized void draw(final Canvas canvas) {
     final boolean rotated = sensorOrientation % 180 == 90;
     final float multiplier =
-        Math.min(
-            canvas.getHeight() / (float) (rotated ? frameWidth : frameHeight),
-            canvas.getWidth() / (float) (rotated ? frameHeight : frameWidth));
+            Math.min(
+                    canvas.getHeight() / (float) (rotated ? frameWidth : frameHeight),
+                    canvas.getWidth() / (float) (rotated ? frameHeight : frameWidth));
     frameToCanvasMatrix =
-        ImageUtils.getTransformationMatrix(
-            frameWidth,
-            frameHeight,
-            (int) (multiplier * (rotated ? frameHeight : frameWidth)),
-            (int) (multiplier * (rotated ? frameWidth : frameHeight)),
-            sensorOrientation,
-            false);
+            ImageUtils.getTransformationMatrix(
+                    frameWidth,
+                    frameHeight,
+                    (int) (multiplier * (rotated ? frameHeight : frameWidth)),
+                    (int) (multiplier * (rotated ? frameWidth : frameHeight)),
+                    sensorOrientation,
+                    false);
     for (final TrackedRecognition recognition : trackedObjects) {
       final RectF trackedPos = new RectF(recognition.location);
 
@@ -243,13 +344,13 @@ public class MultiBoxTracker {
       canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint);
 
       final String labelString =
-          !TextUtils.isEmpty(recognition.title)
-              ? String.format("%s %.2f", recognition.title, (100 * recognition.detectionConfidence))
-              : String.format("%.2f", (100 * recognition.detectionConfidence));
+              !TextUtils.isEmpty(recognition.title)
+                      ? String.format("%s %.2f", recognition.title, (100 * recognition.detectionConfidence))
+                      : String.format("%.2f", (100 * recognition.detectionConfidence));
       //            borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.top,
       // labelString);
       borderedText.drawText(
-          canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
+              canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
     }
   }
 
@@ -269,7 +370,7 @@ public class MultiBoxTracker {
       rgbFrameToScreen.mapRect(detectionScreenRect, detectionFrameRect);
 
       logger.v(
-          "Result! Frame: " + result.getLocation() + " mapped to screen:" + detectionScreenRect);
+              "Result! Frame: " + result.getLocation() + " mapped to screen:" + detectionScreenRect);
 
       screenRects.add(new Pair<Float, RectF>(result.getConfidence(), detectionScreenRect));
 
