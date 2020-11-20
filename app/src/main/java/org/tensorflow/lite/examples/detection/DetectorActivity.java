@@ -54,6 +54,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     private static final int TF_OD_API_INPUT_SIZE = 416;
     private static final boolean TF_OD_API_IS_QUANTIZED = false;
+    // 1) DetectorActivity.java 에서 MODEL_FILE / LABELS_FILE 수정
     //private static final String TF_OD_API_MODEL_FILE = "yolov4-416-fp32.tflite";
     private static final String TF_OD_API_MODEL_FILE = "yolov4-4161.tflite";
     //private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco.txt";
