@@ -105,7 +105,6 @@ public class MultiBoxTracker {
 
   public MultiBoxTracker(final Context context) {
     this.context = context;
-    this.mediaPlayer = MediaPlayer.create(context, R.raw.bollard);
 
     for (final int color : COLORS) {
       availableColors.add(color);
@@ -223,6 +222,7 @@ public class MultiBoxTracker {
           // 사람이 많을 때
 
           // 전방에 사람이 많으니 주의하세요.
+          this.mediaPlayer = MediaPlayer.create(context, R.raw.multi_person);
         } else {
           boolean isMiddle = false;
           for(int i = 0; i < detectedList.size(); i++) {
@@ -237,6 +237,7 @@ public class MultiBoxTracker {
 
           if(isMiddle) {
             // 전방의 사람에 주의하세요.
+            this.mediaPlayer = MediaPlayer.create(context, R.raw.person);
           }
         }
 
@@ -261,6 +262,7 @@ public class MultiBoxTracker {
 
         if(isMiddle) {
           // 전방에 차가 있습니다. 주의하세요.
+          this.mediaPlayer = MediaPlayer.create(context, R.raw.car);
         }
       } else if(DETECT_OBJECT_LIST.get(5) == maxTitle) {
         // """
@@ -280,6 +282,7 @@ public class MultiBoxTracker {
 
         if(isMiddle) {
           // 자전거를 탄 사람이 있습니다. 주의하세요.
+          this.mediaPlayer = MediaPlayer.create(context, R.raw.bikerider);
         }
       } else if(DETECT_OBJECT_LIST.get(6) == maxTitle) {
         // """
@@ -298,11 +301,13 @@ public class MultiBoxTracker {
 
         if(isBottom) {
           // 전방에 볼라드가 있습니다.
+          this.mediaPlayer = MediaPlayer.create(context, R.raw.bollard);
         }
       }
 
     } else {
       // 장애물이 많을 때
+      this.mediaPlayer = MediaPlayer.create(context, R.raw.multi_obstacle);
     }
 
     this.isSpeeching = true;
@@ -312,6 +317,7 @@ public class MultiBoxTracker {
       @Override
       public void onCompletion(MediaPlayer mp) {
         MultiBoxTracker.isSpeeching = false;
+        MultiBoxTracker.mediaPlayer.release();
       }
     });
   }
