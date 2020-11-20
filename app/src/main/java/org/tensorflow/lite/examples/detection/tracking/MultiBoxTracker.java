@@ -198,22 +198,22 @@ public class MultiBoxTracker {
       }
 
       objectCounter.put(title, postionList);
-
-      logger.i("push " + title + " " + confidence + " " + location);
-      logger.i("max" + maxTitle + maxCount);
     }
+
     // 이미 음성을 송출 중이면, 스킵
     if(isSpeeching) return;
 
     // {person=[Pair{LM 8816.249}, Pair{LM 12037.989}]}
-    logger.i(objectCounter.toString(), objectCounter.size());
+    logger.i(objectCounter.toString());
+    logger.i("aaaaaaaaa" + objectCounter.size());
 
+    this.mediaPlayer = null;
 
     // 객체의 종류가 1개일 때
     if(objectCounter.size() == 1) {
       ArrayList<Pair<String, Float>> detectedList = objectCounter.get(maxTitle);
 
-      if(DETECT_OBJECT_LIST.get(0) == maxTitle) {
+      if(DETECT_OBJECT_LIST.get(0).equals(maxTitle)) {
         // """
         // person
         // """
@@ -241,10 +241,10 @@ public class MultiBoxTracker {
           }
         }
 
-      } else if(DETECT_OBJECT_LIST.get(1) == maxTitle
-              || DETECT_OBJECT_LIST.get(2) == maxTitle
-              || DETECT_OBJECT_LIST.get(3) == maxTitle
-              || DETECT_OBJECT_LIST.get(4) == maxTitle) {
+      } else if(DETECT_OBJECT_LIST.get(1).equals(maxTitle)
+              || DETECT_OBJECT_LIST.get(2).equals(maxTitle)
+              || DETECT_OBJECT_LIST.get(3).equals(maxTitle)
+              || DETECT_OBJECT_LIST.get(4).equals(maxTitle)) {
         // """
         // motorcycle, bus, car, truck,
         // """
@@ -264,7 +264,7 @@ public class MultiBoxTracker {
           // 전방에 차가 있습니다. 주의하세요.
           this.mediaPlayer = MediaPlayer.create(context, R.raw.car);
         }
-      } else if(DETECT_OBJECT_LIST.get(5) == maxTitle) {
+      } else if(DETECT_OBJECT_LIST.get(5).equals(maxTitle)) {
         // """
         // bikerider
         // """
@@ -284,7 +284,7 @@ public class MultiBoxTracker {
           // 자전거를 탄 사람이 있습니다. 주의하세요.
           this.mediaPlayer = MediaPlayer.create(context, R.raw.bikerider);
         }
-      } else if(DETECT_OBJECT_LIST.get(6) == maxTitle) {
+      } else if(DETECT_OBJECT_LIST.get(6).equals(maxTitle)) {
         // """
         // bollard
         // """
@@ -310,14 +310,15 @@ public class MultiBoxTracker {
       this.mediaPlayer = MediaPlayer.create(context, R.raw.multi_obstacle);
     }
 
-    this.isSpeeching = true;
+    if(this.mediaPlayer == null) return;
 
+    this.isSpeeching = true;
     this.mediaPlayer.start();
     this.mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
       @Override
       public void onCompletion(MediaPlayer mp) {
         MultiBoxTracker.isSpeeching = false;
-        MultiBoxTracker.mediaPlayer.release();
+//        MultiBoxTracker.mediaPlayer.release();
       }
     });
   }
