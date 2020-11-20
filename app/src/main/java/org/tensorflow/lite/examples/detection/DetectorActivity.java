@@ -26,11 +26,14 @@ import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -195,6 +198,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
         runInBackground(
                 new Runnable() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
                     @Override
                     public void run() {
                         //LOGGER.i("Running detection on image " + currTimestamp);

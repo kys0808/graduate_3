@@ -51,13 +51,12 @@ public class MultiBoxTracker {
   // 탐지할 객체 리스트
   private static final String[] OBJECT_LIST = {
           "person",
-          "bicycle",
           "motorcycle",
           "bus",
-          "train",
+          "car",
           "truck",
           "bikerider",
-          "bollard"
+          "bollard",
   };
   private static final ArrayList<String> DETECT_OBJECT_LIST = new ArrayList<String>(Arrays.asList(OBJECT_LIST));
   public static boolean isSpeeching = false;
@@ -106,7 +105,7 @@ public class MultiBoxTracker {
 
   public MultiBoxTracker(final Context context) {
     this.context = context;
-    this.mediaPlayer = MediaPlayer.create(context, R.raw.bikerider);
+    this.mediaPlayer = MediaPlayer.create(context, R.raw.bollard);
 
     for (final int color : COLORS) {
       availableColors.add(color);
