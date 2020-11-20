@@ -59,6 +59,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     //private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco.txt";
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/myyolo.txt";
 
+    private static long prevDetectTime = 0;
+    private static final int THROTTLEING_TIME = 1000;
+
     private static final DetectorMode MODE = DetectorMode.TF_OD_API;
     private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
     private static final boolean MAINTAIN_ASPECT = false;
@@ -219,6 +222,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                                 result.setLocation(location);
                                 mappedRecognitions.add(result);
                             }
+                        }
+
+                        if(prevDetectTime + THROTTLEING_TIME < startTime ) {
+                            tracker.trackResults(mappedRecognitions, currTimestamp);
+                            prevDetectTime =  startTime;
                         }
 
                         tracker.trackResults(mappedRecognitions, currTimestamp);

@@ -24,12 +24,22 @@ import android.graphics.Paint.Cap;
 import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
+import android.media.MediaPlayer;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.TypedValue;
+
+import androidx.annotation.RequiresApi;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import org.tensorflow.lite.examples.detection.R;
 import org.tensorflow.lite.examples.detection.env.BorderedText;
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
 import org.tensorflow.lite.examples.detection.env.Logger;
@@ -37,6 +47,27 @@ import org.tensorflow.lite.examples.detection.tflite.Classifier.Recognition;
 
 /** A tracker that handles non-max suppression and matches existing objects to new detections. */
 public class MultiBoxTracker {
+
+  // 탐지할 객체 리스트
+  private static final String[] OBJECT_LIST = {
+          "person",
+          "bicycle",
+          "motorcycle",
+          "bus",
+          "train",
+          "truck"
+  };
+  private static final ArrayList<String> DETECT_OBJECT_LIST = new ArrayList<String>(Arrays.asList(OBJECT_LIST));
+  public static boolean isSpeeching = false;
+
+  // 화면 구획
+  private static final int BLOCK_SIZE = 3;
+  private static final String[][] BLOCK_NAMES = {
+          {"LT", "MT", "RT"},
+          {"LM", "MM", "RM"},
+          {"LB", "MB", "RB"}
+  };
+
   private static final float TEXT_SIZE_DIP = 18;
   private static final float MIN_SIZE = 16.0f;
   private static final int[] COLORS = {
@@ -68,7 +99,13 @@ public class MultiBoxTracker {
   private int frameHeight;
   private int sensorOrientation;
 
+  private Context context;
+  private static MediaPlayer mediaPlayer;
+
   public MultiBoxTracker(final Context context) {
+    this.context = context;
+    this.mediaPlayer = MediaPlayer.create(context, R.raw.speech);
+
     for (final int color : COLORS) {
       availableColors.add(color);
     }
@@ -111,9 +148,70 @@ public class MultiBoxTracker {
     }
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.N)
   public synchronized void trackResults(final List<Recognition> results, final long timestamp) {
-    logger.i("Processing %d results from %d", results.size(), timestamp);
-    processResults(results);
+//    logger.i("Processing %d results from %d", results.size(), timestamp);
+    List<Recognition> tmp_results = new ArrayList<Recognition>();
+
+    for(int i = 0; i < results.size(); i++){
+      Recognition recog = results.get(i);
+      String title = results.get(i).getTitle();
+
+      if(DETECT_OBJECT_LIST.indexOf(title) >= 0){
+        tmp_results.add(recog);
+      }
+    }
+    processResults(tmp_results);
+
+    // 이미지 처리
+    processDetectedObject(tmp_results);
+//    processResults(results);
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.N)
+  private void processDetectedObject(List<Recognition> results) {
+    if(results.size() == 0) return;
+    HashMap<String, ArrayList<String>> objectCounter = new HashMap<>();
+
+    String maxTitle = "";
+    int maxCount = 0;
+
+    for(int i = 0; i < results.size(); i++) {
+      Recognition recog = results.get(i);
+      String title = results.get(i).getTitle();
+      float confidence = recog.getConfidence();
+      RectF location = recog.getLocation();
+
+      float centerPosX = (location.right + location.left) / 2;
+      float centerPosY = (location.top + location.bottom) / 2;
+
+      int xIndex = (int)Math.floor(centerPosX / (frameWidth / BLOCK_SIZE));
+      int yIndex = (int)Math.floor(centerPosY / (frameHeight / BLOCK_SIZE));
+
+      ArrayList<String> postionList = objectCounter.getOrDefault(title, new ArrayList<>());
+      postionList.add(BLOCK_NAMES[xIndex][BLOCK_SIZE - yIndex - 1]);
+      if(postionList.size() > maxCount) {
+        maxCount = postionList.size();
+        maxTitle = title;
+      }
+
+      objectCounter.put(title, postionList);
+
+      logger.i("push " + title + " " + confidence + " " + location);
+      logger.i("max" + maxTitle + maxCount);
+    }
+    // 2명 이하는 송출x
+    if(isSpeeching || maxCount < 2) return;
+
+    this.isSpeeching = true;
+
+    this.mediaPlayer.start();
+    this.mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+      @Override
+      public void onCompletion(MediaPlayer mp) {
+        MultiBoxTracker.isSpeeching = false;
+      }
+    });
   }
 
   private Matrix getFrameToCanvasMatrix() {
