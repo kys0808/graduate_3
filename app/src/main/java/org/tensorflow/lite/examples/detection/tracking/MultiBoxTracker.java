@@ -173,7 +173,6 @@ public class MultiBoxTracker {
   private void processDetectedObject(List<Recognition> results) {
     if(results.size() == 0) return;
     HashMap<String, ArrayList<Pair<String, Float>>> objectCounter = new HashMap<>();
-
     String maxTitle = "";
     int maxCount = 0;
 
