@@ -44,6 +44,8 @@ import org.tensorflow.lite.examples.detection.env.Logger;
 import org.tensorflow.lite.examples.detection.tflite.Classifier;
 import org.tensorflow.lite.examples.detection.tflite.YoloV4Classifier;
 import org.tensorflow.lite.examples.detection.tracking.MultiBoxTracker;
+import android.media.MediaPlayer;
+import android.content.Context;
 
 /**
  * An activity that uses a TensorFlowMultiBoxDetector and ObjectTracker to detect and then track
@@ -91,6 +93,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     private BorderedText borderedText;
 
+    private static MediaPlayer mediaPlayer;
+
     @Override
     public void onPreviewSizeChosen(final Size size, final int rotation) {
         final float textSizePx =
@@ -98,6 +102,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                         TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
         borderedText = new BorderedText(textSizePx);
         borderedText.setTypeface(Typeface.MONOSPACE);
+
+        this.mediaPlayer = MediaPlayer.create(this, R.raw.start_app);
+        this.mediaPlayer.start();
 
         tracker = new MultiBoxTracker(this);
 
