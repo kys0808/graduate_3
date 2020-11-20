@@ -62,9 +62,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     // 1) DetectorActivity.java 에서 MODEL_FILE / LABELS_FILE 수정
     // 2) MainActivity.java도 수정 필요
 
-    //private static final String TF_OD_API_MODEL_FILE = "yolov4-original.tflite";
+    private static final String TF_OD_API_MODEL_FILE = "yolov4-original.tflite";
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco.txt";
-    private static final String TF_OD_API_MODEL_FILE = "yolov4-custom.tflite";
+//    private static final String TF_OD_API_MODEL_FILE = "yolov4-custom.tflite";
 
     private static long prevDetectTime = 0;
     private static final int THROTTLEING_TIME = 1000;
