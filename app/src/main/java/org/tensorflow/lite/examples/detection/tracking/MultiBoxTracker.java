@@ -51,11 +51,12 @@ public class MultiBoxTracker {
   // 탐지할 객체 리스트
   private static final String[] OBJECT_LIST = {
           "person",
-          "bicycle",
           "motorcycle",
           "bus",
-          "train",
-          "truck"
+          "car",
+          "truck",
+          "bikerider",
+          "bollard",
   };
   private static final ArrayList<String> DETECT_OBJECT_LIST = new ArrayList<String>(Arrays.asList(OBJECT_LIST));
   public static boolean isSpeeching = false;
@@ -171,7 +172,7 @@ public class MultiBoxTracker {
   @RequiresApi(api = Build.VERSION_CODES.N)
   private void processDetectedObject(List<Recognition> results) {
     if(results.size() == 0) return;
-    HashMap<String, ArrayList<String>> objectCounter = new HashMap<>();
+    HashMap<String, ArrayList<Pair<String, Float>>> objectCounter = new HashMap<>();
 
     String maxTitle = "";
     int maxCount = 0;
@@ -182,14 +183,16 @@ public class MultiBoxTracker {
       float confidence = recog.getConfidence();
       RectF location = recog.getLocation();
 
-      float centerPosX = (location.right + location.left) / 2;
-      float centerPosY = (location.top + location.bottom) / 2;
+      int xIndex = (int)Math.floor(location.centerX() / (frameWidth / BLOCK_SIZE));
+      int yIndex = (int)Math.floor(location.centerY() / (frameHeight / BLOCK_SIZE));
 
-      int xIndex = (int)Math.floor(centerPosX / (frameWidth / BLOCK_SIZE));
-      int yIndex = (int)Math.floor(centerPosY / (frameHeight / BLOCK_SIZE));
+      float areaSize = location.width() * location.height();
+      String position = BLOCK_NAMES[xIndex][BLOCK_SIZE - yIndex - 1];
 
-      ArrayList<String> postionList = objectCounter.getOrDefault(title, new ArrayList<>());
-      postionList.add(BLOCK_NAMES[xIndex][BLOCK_SIZE - yIndex - 1]);
+      ArrayList<Pair<String, Float>> postionList = objectCounter.getOrDefault(title, new ArrayList<>());
+      Pair<String, Float> dataPair = new Pair<>(position, areaSize);
+
+      postionList.add(dataPair);
       if(postionList.size() > maxCount) {
         maxCount = postionList.size();
         maxTitle = title;
@@ -200,8 +203,107 @@ public class MultiBoxTracker {
       logger.i("push " + title + " " + confidence + " " + location);
       logger.i("max" + maxTitle + maxCount);
     }
-    // 2명 이하는 송출x
-    if(isSpeeching || maxCount < 2) return;
+    // 이미 음성을 송출 중이면, 스킵
+    if(isSpeeching) return;
+
+    // {person=[Pair{LM 8816.249}, Pair{LM 12037.989}]}
+    logger.i(objectCounter.toString(), objectCounter.size());
+
+
+    // 객체의 종류가 1개일 때
+    if(objectCounter.size() == 1) {
+      ArrayList<Pair<String, Float>> detectedList = objectCounter.get(maxTitle);
+
+      if(DETECT_OBJECT_LIST.get(0) == maxTitle) {
+        // """
+        // person
+        // """
+
+        if(detectedList.size() > 4) {
+          // 사람이 많을 때
+
+          // 전방에 사람이 많으니 주의하세요.
+        } else {
+          boolean isMiddle = false;
+          for(int i = 0; i < detectedList.size(); i++) {
+            String position = detectedList.get(i).first;
+            float areaSize = detectedList.get(i).second;
+
+            // 화면의 중앙에 있고, 사이즈가 3만 이상. (총 프레임사이즈는 약 30만)
+            if ((position == "MM" || position == "MB") && areaSize > 30000) {
+              isMiddle = true;
+            }
+          }
+
+          if(isMiddle) {
+            // 전방의 사람에 주의하세요.
+          }
+        }
+
+      } else if(DETECT_OBJECT_LIST.get(1) == maxTitle
+              || DETECT_OBJECT_LIST.get(2) == maxTitle
+              || DETECT_OBJECT_LIST.get(3) == maxTitle
+              || DETECT_OBJECT_LIST.get(4) == maxTitle) {
+        // """
+        // motorcycle, bus, car, truck,
+        // """
+
+        boolean isMiddle = false;
+        for(int i = 0; i < detectedList.size(); i++) {
+          String position = detectedList.get(i).first;
+          float areaSize = detectedList.get(i).second;
+
+          // 화면의 중앙에 있고, 사이즈가 10만 이상. (총 프레임사이즈는 약 30만)
+          if ((position == "MM" || position == "MB") && areaSize > 100000) {
+            isMiddle = true;
+          }
+        }
+
+        if(isMiddle) {
+          // 전방에 차가 있습니다. 주의하세요.
+        }
+      } else if(DETECT_OBJECT_LIST.get(5) == maxTitle) {
+        // """
+        // bikerider
+        // """
+
+        boolean isMiddle = false;
+        for(int i = 0; i < detectedList.size(); i++) {
+          String position = detectedList.get(i).first;
+          float areaSize = detectedList.get(i).second;
+
+          // 화면의 중앙에 있고, 사이즈가 5만 이상. (총 프레임사이즈는 약 30만)
+          if ((position == "MM" || position == "MB") && areaSize > 50000) {
+            isMiddle = true;
+          }
+        }
+
+        if(isMiddle) {
+          // 자전거를 탄 사람이 있습니다. 주의하세요.
+        }
+      } else if(DETECT_OBJECT_LIST.get(6) == maxTitle) {
+        // """
+        // bollard
+        // """
+
+        boolean isBottom = false;
+        for(int i = 0; i < detectedList.size(); i++) {
+          String position = detectedList.get(i).first;
+
+          // 화면의 아래에 있을 때
+          if (position == "LB" || position == "MB" || position == "RB") {
+            isBottom = true;
+          }
+        }
+
+        if(isBottom) {
+          // 전방에 볼라드가 있습니다.
+        }
+      }
+
+    } else {
+      // 장애물이 많을 때
+    }
 
     this.isSpeeching = true;
 
