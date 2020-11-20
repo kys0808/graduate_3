@@ -55,10 +55,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private static final int TF_OD_API_INPUT_SIZE = 416;
     private static final boolean TF_OD_API_IS_QUANTIZED = false;
     // 1) DetectorActivity.java 에서 MODEL_FILE / LABELS_FILE 수정
-    //private static final String TF_OD_API_MODEL_FILE = "yolov4-416-fp32.tflite";
-    private static final String TF_OD_API_MODEL_FILE = "yolov4-4161.tflite";
-    //private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco.txt";
-    private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/myyolo.txt";
+    // 2) MainActivity.java도 수정 필요
+
+    //private static final String TF_OD_API_MODEL_FILE = "yolov4-original.tflite";
+    private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco.txt";
+    private static final String TF_OD_API_MODEL_FILE = "yolov4-custom.tflite";
 
     private static long prevDetectTime = 0;
     private static final int THROTTLEING_TIME = 1000;
@@ -172,7 +173,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             return;
         }
         computingDetection = true;
-        LOGGER.i("Preparing image " + currTimestamp + " for detection in bg thread.");
+        //LOGGER.i("Preparing image " + currTimestamp + " for detection in bg thread.");
 
         rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
 
@@ -189,7 +190,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 new Runnable() {
                     @Override
                     public void run() {
-                        LOGGER.i("Running detection on image " + currTimestamp);
+                        //LOGGER.i("Running detection on image " + currTimestamp);
                         final long startTime = SystemClock.uptimeMillis();
                         final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
                         lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
