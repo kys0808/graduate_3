@@ -260,7 +260,7 @@ public class MultiBoxTracker {
             ObjectInfo object = detectedList.get(i);
 
             // 화면의 중앙에 있고, 사이즈가 2만 이상. (총 프레임사이즈는 약 30만)
-            if ((object.position == "MM" || object.position == "MB") && object.areaSize > 20000) {
+            if ((object.position == "MM" || object.position == "MB") && object.areaSize > 15000) {
               isMiddle = true;
             }
           }
@@ -283,7 +283,7 @@ public class MultiBoxTracker {
           ObjectInfo object = detectedList.get(i);
 
           // 화면의 중앙에 있고, 사이즈가 6만 이상. (총 프레임사이즈는 약 30만)
-          if ((object.position == "MM" || object.position == "MB") && object.areaSize > 40000) {
+          if ((object.position == "MM" || object.position == "MB") && object.areaSize > 30000) {
             isMiddle = true;
           }
         }
@@ -302,7 +302,9 @@ public class MultiBoxTracker {
           ObjectInfo object = detectedList.get(i);
 
           // 화면의 중앙에 있고, 사이즈가 3만 이상. (총 프레임사이즈는 약 30만)
-          if ((object.position == "MM" || object.position == "MB") && object.areaSize > 30000) {
+          if ((object.position == "MM" || object.position == "MB" || object.position == "LB" ||
+                  object.position == "RB" || object.position == "MT" ||
+                  object.position == "RM" || object.position == "LM") && object.areaSize > 10000) {
             isMiddle = true;
           }
         }
@@ -321,7 +323,7 @@ public class MultiBoxTracker {
           ObjectInfo object = detectedList.get(i);
 
           // 화면의 아래에 있을 때
-          if (object.position == "LB" || object.position == "MB" || object.position == "RB") {
+          if (object.position == "LB" || object.position == "MB" || object.position == "RB" || object.position == "MM" || object.position =="LM" || object.position == "RM") {
             isBottom = true;
           }
         }
